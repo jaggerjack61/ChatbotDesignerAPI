@@ -31,9 +31,9 @@ class TemplatePage(models.Model):
 class TemplateOption(models.Model):
     template_page = models.ForeignKey(TemplatePage, on_delete=models.CASCADE, null=True)
     type = models.CharField(max_length=10)
-    text = models.CharField(max_length=20)
-    value = models.CharField(max_length=20)
-    description = models.CharField(max_length=40, null=True)
+    text = models.CharField(max_length=50)
+    value = models.CharField(max_length=50)
+    description = models.CharField(max_length=500, null=True)
 
     def __str__(self):
         return self.type+" "+self.value

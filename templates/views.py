@@ -12,8 +12,7 @@ class TemplatePageViewSet(viewsets.ModelViewSet):
     queryset = TemplatePage.objects.all()
     serializer_class = TemplatePageSerializer
 
+
 class TemplateOptionViewSet(viewsets.ModelViewSet):
     queryset = TemplateOption.objects.all()
     serializer_class = TemplateOptionSerializer
-
-

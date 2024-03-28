@@ -3,11 +3,11 @@ from dotenv import load_dotenv
 import requests
 import json
 import os
-
 from templates.models import TemplatePage, TemplateOption
 
 load_dotenv()
-BEARER = "EAAI6mp4cpyIBO6gnqiObSZBOZBT8a4lizlmt8Ng6FX0FTAjxkZBt4YfXpxsLp3D1l0QTno9ZAeIJhHfYdZCYoXo249ZBxTzE4U7pb5dSzk5IhLjD8750St5hntZCJJONXCxM3bbfEQOHyp7UYEI8rJWHSshLPN3bdVEtkdVzhUNarQN17S65xFajl2CJZB71lfUnajbNcxCY7gcXGv2pMw8ZD"
+BEARER = os.getenv("BEARER_TOKEN")
+# BEARER = 'EAAI6mp4cpyIBAFfUFqdx2F4xfZAbDP1AZCZAHzowikz0WxBc9QlTl4cokd3wbLsO9npXYqKn6pZBdzuQ8ACcbXp3ZACdjvc3ZCSKxz99z4l3s2wRzwgqR7DXFEbejboiVLPHSJ48tNlDy96akJjDZAAO8lRP8tyN6Cp0mjg1ABIaIBYZCSOOfnSr'
 PHONE_ID = os.getenv("PHONE_ID")
 TOKEN = os.getenv("VERIFICATION_TOKEN")
 
@@ -51,6 +51,17 @@ def extract_message_and_phone(payload):
         phone_number = payload['entry'][0]['changes'][0]['value']['contacts'][0]['wa_id']
         return message, phone_number
     except (KeyError, IndexError, TypeError):
+        return None, None
+
+
+def extract_status_and_phone(payload):
+    try:
+        print('here 3')
+        phone_number = payload['entry'][0]['changes'][0]['value']['statuses'][0]['recipient_id']
+        status = payload['entry'][0]['changes'][0]['value']['statuses'][0]['status']
+        return status, phone_number
+    except (KeyError, IndexError, TypeError):
+        print('here 2')
         return None, None
 
 
@@ -203,16 +214,59 @@ def send_list(text, list_items, phone_number):
 
     print(response.text)
 
+
+def send_template(template, data, language, phone_number):
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {BEARER}'
+    }
+
+    body = {
+        "messaging_product": "whatsapp",
+        "recipient_type": "individual",
+        "to": phone_number,
+        "type": "template",
+        "template": {
+            "name": template,
+            "language": {
+                "code": language
+            }
+        }
+    }
+
+    # If data is not null, add it to the body
+    if data is not None:
+        body["template"]["components"] = [
+            {
+                "type": "body",
+                "parameters": [
+                    {
+                        "type": "text",
+                        "text": data
+                    }
+                ]
+            }
+        ]
+
+    response = requests.post(f'https://graph.facebook.com/v13.0/{PHONE_ID}/messages',
+                             headers=headers, json=body)
+    print(response.text)
+
+
+def bulk_send_template(request):
+    pass
+
+
 def prebuild(category, value):
     if category == "button" or category == "list":
         page = TemplatePage.objects.get(pk=value)
         return page
     elif category == "text":
-        option = TemplateOption.objects.filter(value__iexact=value).first()
+        option = TemplateOption.objects.filter(text__iexact=value).first()
         if option is None:
             page = TemplatePage.objects.first()
             return page
-        page = TemplatePage.objects.get(pk=option.template_page.id)
+        page = TemplatePage.objects.get(pk=option.value)
         return page
     else:
         page = TemplatePage.objects.filter(is_default=True).filter(template__status=True).first()
@@ -229,27 +283,6 @@ def page_builder(category, message):
         return "button", [page.header, page.body, page.footer], buttons
     elif page.type == "list":
         options = TemplateOption.objects.filter(template_page=page).filter(type="list")
-        list_options = [{"value": option.value, "text": option.text, "description":option.description} for option in options]
+        list_options = [{"value": option.value, "text": option.text, "description": option.description} for option in
+                        options]
         return "list", [page.header, page.body, page.footer, page.menu_title], list_options
-
-# def send_button(text, buttons, phone_number):
-#     options = []
-#     for b in buttons:
-#         options.append({"type": "reply",
-#                         "reply": {
-#                             "id": b['value'],
-#                             "title": b['text']
-#                         }
-#                         })
-#     messenger.send_reply_button(
-#         recipient_id=phone_number,
-#         button={
-#             "type": "button",
-#             "body": {
-#                 "text": text
-#             },
-#             "action": {
-#                 "buttons": options
-#             }
-#         },
-#     )

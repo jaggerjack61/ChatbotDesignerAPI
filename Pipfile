@@ -9,6 +9,8 @@ djangorestframework = "*"
 markdown = "*"
 python-dotenv = "*"
 requests = "*"
+django-cors-headers = "*"
+celery = "*"
 
 [dev-packages]
 

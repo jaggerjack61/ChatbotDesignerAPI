@@ -20,6 +20,7 @@ class TemplatePageSerializer(serializers.ModelSerializer):
         depth = 1
 
     def create(self, validated_data):
+        print(validated_data)
         templateId = validated_data.pop('templateId')
         template_page = TemplatePage.objects.create(template=templateId, **validated_data)
         return template_page
