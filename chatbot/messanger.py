@@ -215,7 +215,44 @@ def send_list(text, list_items, phone_number):
     print(response.text)
 
 
-def send_template(template, data, language, phone_number):
+# def send_template(template, data, language, phone_number):
+#     headers = {
+#         'Content-Type': 'application/json',
+#         'Authorization': f'Bearer {BEARER}'
+#     }
+#
+#     body = {
+#         "messaging_product": "whatsapp",
+#         "recipient_type": "individual",
+#         "to": phone_number,
+#         "type": "template",
+#         "template": {
+#             "name": template,
+#             "language": {
+#                 "code": language
+#             }
+#         }
+#     }
+#
+#     # If data is not null, add it to the body
+#     if data is not None:
+#         body["template"]["components"] = [
+#             {
+#                 "type": "body",
+#                 "parameters": [
+#                     {
+#                         "type": "text",
+#                         "text": data
+#                     }
+#                 ]
+#             }
+#         ]
+#
+#     response = requests.post(f'https://graph.facebook.com/v13.0/{PHONE_ID}/messages',
+#                              headers=headers, json=body)
+#     print(response.text)
+
+def send_template(template, data, language, phone_number, image_url=None):
     headers = {
         'Content-Type': 'application/json',
         'Authorization': f'Bearer {BEARER}'
@@ -230,23 +267,36 @@ def send_template(template, data, language, phone_number):
             "name": template,
             "language": {
                 "code": language
-            }
+            },
+            "components": []
         }
     }
 
-    # If data is not null, add it to the body
-    if data is not None:
-        body["template"]["components"] = [
-            {
-                "type": "body",
-                "parameters": [
-                    {
-                        "type": "text",
-                        "text": data
+    # If an image URL is provided, add it as a header component
+    if image_url:
+        body["template"]["components"].append({
+            "type": "header",
+            "parameters": [
+                {
+                    "type": "image",
+                    "image": {
+                        "link": image_url
                     }
-                ]
-            }
-        ]
+                }
+            ]
+        })
+
+    # If data is not null, add it as a body component
+    if data:
+        body["template"]["components"].append({
+            "type": "body",
+            "parameters": [
+                {
+                    "type": "text",
+                    "text": data
+                }
+            ]
+        })
 
     response = requests.post(f'https://graph.facebook.com/v13.0/{PHONE_ID}/messages',
                              headers=headers, json=body)
@@ -275,6 +325,8 @@ def prebuild(category, value):
 
 def page_builder(category, message):
     page = prebuild(category, message)
+    if page is None:
+        return None, None, None
     if page.type == "text":
         return "text", page.body, []
     elif page.type == "button":

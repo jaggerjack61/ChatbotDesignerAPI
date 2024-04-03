@@ -27,11 +27,13 @@ def webhook(request):
         if phone_number is not None:
             if Number.objects.filter(phone_number=phone_number).exists():
                 number = Number.objects.filter(phone_number=phone_number).first()
+                print(number.phone_number)
             else:
                 number = Number(phone_number=phone_number)
                 number.save()
+                print(number.phone_number)
 
-        if category is not None:
+        if category in ['list', 'button', 'text']:
             page_type, text, options = page_builder(category, message)
             if page_type == "text":
                 send_text(text=text, phone_number=phone_number)
@@ -78,6 +80,3 @@ class CSVUploadView(APIView):
         # return JsonResponse({'status': 'Batch process started','task':task.id}, status=status.HTTP_201_CREATED)
         batch_send(csv_data=csv_data, template=template, language=language, data=data)
         return JsonResponse({'status': 'Batch process started'}, status=status.HTTP_201_CREATED)
-
-
-

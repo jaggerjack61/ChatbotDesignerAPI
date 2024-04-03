@@ -10,7 +10,7 @@ markdown = "*"
 python-dotenv = "*"
 requests = "*"
 django-cors-headers = "*"
-celery = "*"
+django4-background-tasks = "*"
 
 [dev-packages]
 

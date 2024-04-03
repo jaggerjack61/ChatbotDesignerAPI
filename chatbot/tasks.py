@@ -1,18 +1,20 @@
 import csv
+import threading
 from io import StringIO
-
-from celery import shared_task
-
 from chatbot.messanger import send_template
 from chatbot.models import Batch, Number, MessageLog
+from background_task import background
+import time
 
 
-@shared_task
+@background
 def batch_send(csv_data, template, language, data):
+    # time.sleep(60)
     decoded_file = StringIO(csv_data)
     reader = csv.DictReader(decoded_file)
     batch = Batch(template=template, language=language)
     batch.save()
+    print(f"Is current thread alive: {threading.current_thread().is_alive()}")
     for row in reader:
         phone_number = row.get('phone_number')
         if phone_number:

@@ -42,7 +42,7 @@ class TemplatePageSerializer(serializers.ModelSerializer):
 
 
 class TemplateOptionSerializer(serializers.ModelSerializer):
-    template_pageId = serializers.PrimaryKeyRelatedField(queryset=TemplatePage.objects.all(), write_only=True)
+    template_pageId = serializers.PrimaryKeyRelatedField(queryset=TemplatePage.objects.all(), write_only=True, required=False)
     template_page = TemplatePageSerializer(read_only=True)
 
     class Meta:
@@ -52,7 +52,7 @@ class TemplateOptionSerializer(serializers.ModelSerializer):
         depth = 1
 
     def create(self, validated_data):
-        template_pageId = validated_data.pop('template_pageId')
+        template_pageId = validated_data.pop('template_pageId', None)
         template_option = TemplateOption.objects.create(template_page=template_pageId, **validated_data)
         return template_option
 

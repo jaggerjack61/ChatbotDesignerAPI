@@ -1,6 +1,6 @@
 from rest_framework import viewsets
 from .models import Template, TemplatePage, TemplateOption
-from .serealizers import TemplateSerializer, TemplatePageSerializer, TemplateOptionSerializer
+from .serializers import TemplateSerializer, TemplatePageSerializer, TemplateOptionSerializer
 
 
 class TemplateViewSet(viewsets.ModelViewSet):

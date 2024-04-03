@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'templates',
     'chatbot',
-    'corsheaders'
+    'corsheaders',
+    'background_task'
 ]
 
 MIDDLEWARE = [
